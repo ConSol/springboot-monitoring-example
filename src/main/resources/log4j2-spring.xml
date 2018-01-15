@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="60">
+    <Properties>
+    </Properties>
+    <Appenders>
+        <Console name="ROOT-Appender" target="SYSTEM_OUT">
+            <PatternLayout>
+                <pattern>
+                    [%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n
+                </pattern>>
+            </PatternLayout>
+        </Console>
+        <Console name="Console-Appender" target="SYSTEM_OUT">
+            <PatternLayout>
+                <pattern>
+                    %highlight{[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS}} [%t] %c{1} - %msg%n
+                </pattern>>
+            </PatternLayout>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="de.consol.RestServiceDemo" level="DEBUG" additivity="false">
+			<AppenderRef ref="Console-Appender" level="DEBUG"/>
+         </Logger>
+		<Root  level="INFO" additivity="false">
+			<AppenderRef ref="ROOT-Appender"/>
+		</Root>
+    </Loggers>
+</Configuration>

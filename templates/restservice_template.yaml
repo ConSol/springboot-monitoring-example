@@ -1,0 +1,126 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: Example REST application with Prometheus metrics
+parameters:
+- description: The namespace to instantiate the application under. 
+  name: NAMESPACE
+  required: true
+- description: The application name. 
+  name: APP_NAME
+  required: true
+  value: restservice
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    tags:
+    - annotations:
+      from:
+        kind: DockerImage
+        name: olafmeyer/restservice:v1.0
+      generation: 2
+      importPolicy: {}
+      name: v1.0
+      referencePolicy:
+        type: Source
+  status:
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    replicas: 3
+    selector:
+      app: ${APP_NAME}
+      deploymentconfig: ${APP_NAME}
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+          prometheus.io/path: /metrics
+          prometheus.io/port: "8080"
+          prometheus.io/scrape: "true"
+        labels:
+          app: ${APP_NAME}
+          deploymentconfig: ${APP_NAME}
+      spec:
+        containers:
+        - image: olafmeyer/${APP_NAME}
+          imagePullPolicy: IfNotPresent
+          name: ${APP_NAME}
+          resources: {}
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${APP_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${APP_NAME}:v1.0
+          namespace: prometheus
+      type: ImageChange
+  status:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/scheme: http
+      prometheus.io/port: "8080"
+#      prometheus.io/path: /metrics
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    externalTrafficPolicy: Cluster
+    ports:
+    - name: web
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: ${APP_NAME}
+    type: LoadBalancer
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    port:
+      targetPort: web
+    to:
+      kind: Service
+      name: ${APP_NAME}
+  status:
