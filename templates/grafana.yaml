@@ -82,81 +82,6 @@ objects:
     namespace: "${NAMESPACE}"
   stringData:
     session_secret: "${SESSION_SECRET}="
-# Deploy Prometheus behind an oauth proxy
-#- apiVersion: extensions/v1beta1
-#  kind: Deployment
-#  metadata:
-#    labels:
-#      app: grafana-ocp
-#    name: grafana-ocp
-#    namespace: "${NAMESPACE}"
-#  spec:
-#    replicas: 1
-#    selector:
-#      matchLabels:
-#        app: grafana-ocp
-#    template:
-#      metadata:
-#        labels:
-#          app: grafana-ocp
-#        name: grafana-ocp-app
-#      spec:
-#        serviceAccountName: grafana-ocp
-#        containers:
-#        - name: oauth-proxy
-#          image: ${IMAGE_PROXY}
-#          imagePullPolicy: IfNotPresent
-#          ports:
-#          - containerPort: 8443
-#            name: web
-#          args:
-#          - -provider=openshift
-#          - -https-address=:8443
-#          - -http-address=
-#          - -email-domain=*
-#          - -upstream=http://localhost:3000
-#          - -client-id=system:serviceaccount:${NAMESPACE}:grafana-ocp
-#          - '-openshift-sar={"namespace": "${NAMESPACE}", "verb": "list", "resource": "services"}'
-#          - -tls-cert=/etc/tls/private/tls.crt
-#          - -tls-key=/etc/tls/private/tls.key
-#          - -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
-#          - -cookie-secret-file=/etc/proxy/secrets/session_secret
-#          - -skip-auth-regex=^/metrics
-#          volumeMounts:
-#          - mountPath: /etc/tls/private
-#            name: gf-tls
-#          - mountPath: /etc/proxy/secrets
-#            name: secrets
-#
-#        - name: grafana-ocp
-#          image: ${IMAGE_GF}
-#          ports:
-#          - name: grafana-http
-#            containerPort: 3000
-#          volumeMounts:
-#          - mountPath: "/root/go/src/github.com/grafana/grafana/data"
-#            name: gf-data
-#          - mountPath: "/root/go/src/github.com/grafana/grafana/conf"
-#            name: gfconfig
-#          - mountPath: /etc/tls/private
-#            name: gf-tls
-#          - mountPath: /etc/proxy/secrets
-#            name: secrets
-#          command:
-#           - "./bin/grafana-server"
-#
-#        volumes:
-#        - name: gfconfig
-#          configMap:
-#            name: gf-config
-#        - name: secrets
-#          secret:
-#            secretName: gf-proxy
-#        - name: gf-tls
-#          secret:
-#            secretName: gf-tls
-#        - emptyDir: {}
-#          name: gf-data
 - apiVersion: apps/v1beta1
   kind: StatefulSet
   metadata:
@@ -180,23 +105,6 @@ objects:
       spec:
         serviceAccountName: grafana-ocp
         containers:
-#- apiVersion: v1
-#  kind: DeploymentConfig
-#  metadata:
-#    labels:
-#      app: grafana-ocp
-#    name: grafana-ocp
-#    namespace: ${NAMESPACE}
-#  spec:
-#    replicas: 1
-#    template:
-#      metadata:
-#        labels:
-#          app: grafana-ocp
-#        name: grafana-ocp-app
-#      spec:
-#        serviceAccountName: grafana-ocp
-#        containers:
         - name: oauth-proxy
           image: ${IMAGE_PROXY}
           imagePullPolicy: IfNotPresent
@@ -591,7 +499,7 @@ objects:
       mode = console file
 
       # Either "debug", "info", "warn", "error", "critical", default is "info"
-      level = error
+      level = info
 
       # optional settings to set different levels for specific loggers. Ex filters = sqlstore:debug
       filters =
