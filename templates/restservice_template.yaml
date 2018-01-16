@@ -65,6 +65,16 @@ objects:
         - image: olafmeyer/${APP_NAME}
           imagePullPolicy: IfNotPresent
           name: ${APP_NAME}
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           resources: {}
         dnsPolicy: ClusterFirst
         restartPolicy: Always
