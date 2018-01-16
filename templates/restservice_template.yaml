@@ -4,9 +4,6 @@ metadata:
   creationTimestamp: null
   name: Example REST application with Prometheus metrics
 parameters:
-- description: The namespace to instantiate the application under. 
-  name: NAMESPACE
-  required: true
 - description: The application name. 
   name: APP_NAME
   required: true
@@ -84,7 +81,6 @@ objects:
         from:
           kind: ImageStreamTag
           name: ${APP_NAME}:v1.0
-          namespace: prometheus
       type: ImageChange
   status:
 - apiVersion: v1
